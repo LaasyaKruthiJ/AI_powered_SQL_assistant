@@ -1,0 +1,7 @@
+langchain==0.1.17
+langchain-community==0.0.28
+mysql-connector-python==8.4.0
+sqlalchemy>=2.0.0
+ollama==0.1.6
+streamlit
+flask
