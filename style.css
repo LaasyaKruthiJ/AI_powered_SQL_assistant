@@ -42,7 +42,7 @@ form button:hover {
     background: #0056b3;
 }
 
-.result {
+#result {
     margin-top: 30px;
     text-align: left;
     background: #f9f9f9;

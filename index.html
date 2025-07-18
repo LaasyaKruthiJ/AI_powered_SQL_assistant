@@ -4,29 +4,46 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI SQL Assistant</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="/style.css">
+
 </head>
 <body>
     <div class="container">
         <h1>AI-Powered SQL Assistant</h1>
-        <form method="POST">
-            <input type="text" name="question" placeholder="Ask your question..." required>
+        <form id="queryForm">
+            <input type="text" id="question" name="question" placeholder="Ask your question..." required>
             <button type="submit">Get Answer</button>
         </form>
-
-        {% if query %}
-            <div class="result">
-                <h2>Your Question:</h2>
-                <p>{{ query }}</p>
-                {% if answer %}
-                    <h2>Answer:</h2>
-                    <p>{{ answer }}</p>
-                    {% if execution_time %}
-                        <p><em>Time taken: {{ execution_time }} seconds</em></p>
-                    {% endif %}
-                {% endif %}
-            </div>
-        {% endif %}
+        <div id="result"></div>
     </div>
+
+    <script>
+        document.getElementById('queryForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const question = document.getElementById('question').value;
+
+            // Show loading message
+            document.getElementById('result').innerHTML = "<p>Processing...</p>";
+
+            const response = await fetch('/get-result', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({ question })
+            });
+
+            const data = await response.json();
+            if (data.error) {
+                document.getElementById('result').innerHTML = `<p style="color:red;">${data.error}</p>`;
+            } else {
+                document.getElementById('result').innerHTML = `
+                    <h2>Your Question:</h2><p>${data.query}</p>
+                    <h2>Answer:</h2><p>${data.answer}</p>
+                    <p><em>Time taken: ${data.execution_time} seconds</em></p>
+                `;
+            }
+        });
+    </script>
 </body>
 </html>

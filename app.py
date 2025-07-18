@@ -1,28 +1,31 @@
-from flask import Flask, render_template, request
-from modal import full_chain 
+from flask import Flask, request, send_from_directory
 import time
+from modal import full_chain
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='.', template_folder='.')
 
-@app.route("/", methods=["GET", "POST"])
+@app.route("/", methods=["GET"])
 def index():
-    answer = None
-    query = None
-    sql_query = None
-    execution_time = None
+    return send_from_directory('.', 'index.html')
 
-    if request.method == "POST":
-        query = request.form.get("question")
-        if query:
-            start_time = time.time()
-            try:
-                response = full_chain.invoke({"question": query})
-                answer = response
-                execution_time = round(time.time() - start_time, 2)
-            except Exception as e:
-                answer = f"Error: {str(e)}"
+@app.route("/style.css")
+def style():
+    return send_from_directory('.', 'style.css')
 
-    return render_template("index.html", answer=answer, query=query, execution_time=execution_time)
+
+@app.route("/get-result", methods=["POST"])
+def get_result():
+    query = request.form.get("question")
+    if query:
+        start_time = time.time()
+        try:
+            response = full_chain.invoke({"question": query})
+            answer = response
+            execution_time = round(time.time() - start_time, 2)
+        except Exception as e:
+            return {"error": f"Error: {str(e)}"}
+        return {"query": query, "answer": answer, "execution_time": execution_time}
+    return {"error": "No question provided"}
 
 if __name__ == "__main__":
     app.run(debug=True)
